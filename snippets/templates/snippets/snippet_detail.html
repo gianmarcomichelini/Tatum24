@@ -1,199 +1,248 @@
-{% extends 'tatum24/templates/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}{{ snippet.title }}{% endblock %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/snippet_detail.css' %}">
     <link rel="stylesheet" href="{% static 'css/pygments.css' %}">
     <style>
-        .edit-btn {
-            float: right;
-            margin-top: -35px;
-            margin-right: 10px;
+        .toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 1080;
         }
 
-        .bookmark-btn {
-            float: right;
-            margin-top: -35px;
-            margin-right: 10px;
-            margin-left: 10px;
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
         }
 
-        .bookmarked {
-            background-color: green;
-            color: white;
-            border: 1px solid darkgreen;
-            padding: 5px 10px;
-            border-radius: 5px;
+        /* Light Theme for Code Block */
+        .code-block-container .snippet-code pre {
+            margin: 0;
+            padding: 1rem;
+            background-color: #f9f9f9 !important; /* A soft, light gray background */
+            border: 1px solid #e0e0e0; /* A subtle border */
+            border-top: none;
+            color: #333;
+            font-family: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
 
-        .disliked {
-            background-color: red;
-            color: white;
-            border: 5px solid darkred;
-            padding: 5px 10px;
-            border-radius: 10px;
-        }
-
-        .liked {
-            background-color: green;
-            color: white;
-            border: 5px solid darkgreen;
-            padding: 5px 10px;
-            border-radius: 10px;
-        }
-
-        .delete-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
-        .PDF {
-            background-color: darkslategray;
-            color: white;
-            border: 1px solid darkgreen;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-
-        .copy-btn {
-            background-color: #007bff;
-            color: white;
-            margin-top: 10px;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            margin-left: 10px;
-            cursor: pointer;
+        /* Adjustments for the card header */
+        .card-header-code {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef; /* Lighter background for the header */
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <header>
-            <h1>{{ snippet.title }}</h1>
-            <p class="meta">Created: {{ snippet.pub_date }}</p>
-            <p class="meta">Updated: {{ snippet.update_date }}</p>
-            <p class="meta">Author: {{ snippet.author }}</p>
-            <p class="meta">Language: {{ snippet.language }}</p>
-        </header>
+    <div class="toast-container">
+        <div id="copyToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Code copied to clipboard!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
 
-        <main>
-            {% if snippet.author%}
-                <a href="{% url 'edit_snippet' snippet.pk %}" class="btn btn-primary edit-btn">Edit Snippet</a>
+        <div id="pdfToast" class="toast align-items-center text-bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Your PDF will be downloaded shortly.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
+        <div>
+            <h1 class="h2 fw-bold mb-1">{{ snippet.title }}</h1>
+            <p class="text-muted mb-0">By {{ snippet.author }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+            {% if snippet.author %}
+                <a href="{% url 'edit_snippet' snippet.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil-square me-1"></i> Edit
+                </a>
             {% endif %}
-
             {% if user.is_authenticated %}
                 {% if not bookmarked %}
-                    <a href="{% url 'add_bookmark' snippet_id=snippet.pk %}" class="btn btn-success bookmark-btn">Add
-                        Bookmark</a>
+                    <a href="{% url 'add_bookmark' snippet.pk %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-bookmark-plus me-1"></i> Save
+                    </a>
                 {% else %}
-                    <form action="{% url 'delete_bookmark' snippet_id=snippet.pk %}" method="post" class="d-inline">
+                    <form method="post" action="{% url 'delete_bookmark' snippet.pk %}" class="d-inline">
                         {% csrf_token %}
-                        <button type="submit" class="btn bookmark-btn bookmarked">Bookmarked</button>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-bookmark-check-fill me-1"></i> Saved
+                        </button>
                     </form>
                 {% endif %}
             {% endif %}
+        </div>
+    </div>
 
-            <h3>Description</h3>
-            <div class="code-highlight">
-                {{ snippet.description_html | safe }}
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="card p-4 h-100 shadow-sm">
+                <h5 class="fw-semibold mb-3">Snippet Details</h5>
+                <div class="metadata-grid">
+                    <div class="d-flex flex-column">
+                        <span class="text-muted small">Language</span>
+                        <span class="fw-semibold">{{ snippet.language }}</span>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <span class="text-muted small">Created</span>
+                        <span class="fw-semibold">{{ snippet.pub_date|date:"F j, Y" }}</span>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <span class="text-muted small">Last Updated</span>
+                        <span class="fw-semibold">{{ snippet.update_date|date:"F j, Y" }}</span>
+                    </div>
+                </div>
             </div>
-            <h4>---</h4>
+        </div>
 
-            <div class="snippet-code highlight">{{ snippet.highlighted_code | safe }}</div>
+        <div class="col-lg-4">
+            <div class="card p-4 h-100 shadow-sm d-flex flex-column justify-content-between">
+                <h5 class="fw-semibold mb-3">Ratings</h5>
+                <div class="d-flex gap-2 align-items-center mb-3">
+                    <form method="post" action="{% url 'rate_snippet' snippet.pk %}" class="d-flex gap-2">
+                        {% csrf_token %}
+                        {% if snippet.user_rating == 'like' %}
+                            <button type="button" class="btn btn-success btn-sm" disabled>
+                                <i class="bi bi-hand-thumbs-up-fill me-1"></i> Liked
+                            </button>
+                            <button type="submit" name="rating" value="dislike" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-hand-thumbs-down me-1"></i> Dislike
+                            </button>
+                        {% elif snippet.user_rating == 'dislike' %}
+                            <button type="submit" name="rating" value="like" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-hand-thumbs-up me-1"></i> Like
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" disabled>
+                                <i class="bi bi-hand-thumbs-down-fill me-1"></i> Disliked
+                            </button>
+                        {% else %}
+                            <button type="submit" name="rating" value="like" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-hand-thumbs-up me-1"></i> Like
+                            </button>
+                            <button type="submit" name="rating" value="dislike" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-hand-thumbs-down me-1"></i> Dislike
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Likes: {{ snippet.get_likes }}</span>
+                    <span class="text-muted small">Dislikes: {{ snippet.get_dislikes }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <button class="copy-btn btn" onclick="copyToClipboard()">Copy Code</button>
-        </main>
+    <div class="card p-4 shadow-sm mb-4">
+        <h5 class="fw-semibold mb-3">Description</h5>
+        <div class="code-highlight">
+            {{ snippet.description_html|safe }}
+        </div>
+    </div>
 
-        <footer class="mt-4">
-            <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
-            <a href="{% url 'snippet_list' %}" class="btn btn-secondary">Back to Snippet List</a>
-            {% if user.is_authenticated and user == snippet.author %}
-                <a href="{% url 'profile' %}" class="btn btn-secondary">Back to Profile</a>
-            {% endif %}
-            <a id="download-pdf-btn" href="{% url 'download_pdf' snippet.pk %}" class="PDF btn">Download as PDF</a>
-        </footer>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header-code">
+            <span>Code</span>
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard()">
+                <i class="bi bi-clipboard me-1"></i> Copy
+            </button>
+        </div>
+        <div class="code-block-container">
+            <div class="snippet-code">
+                {{ snippet.highlighted_code|safe }}
+            </div>
+        </div>
+    </div>
 
-        <form action="{% url 'rate_snippet' snippet.pk %}" method="post">
-            {% csrf_token %}
-            {% if snippet.user_rating == 'like' %}
-                <button type="button" class="btn liked" disabled>Liked</button>
-                <button type="submit" name="rating" value="dislike" class="btn disliked">Dislike</button>
-            {% elif snippet.user_rating == 'dislike' %}
-                <button type="submit" name="rating" value="like" class="btn liked">Like</button>
-                <button type="button" class="btn disliked" disabled>Disliked</button>
-            {% else %}
-                <button type="submit" name="rating" value="like" class="btn liked">Like</button>
-                <button type="submit" name="rating" value="dislike" class="btn disliked">Dislike</button>
-            {% endif %}
-        </form>
+    <a id="download-pdf-btn" href="{% url 'download_pdf' snippet.pk %}" class="btn btn-dark btn-sm mb-5">
+        <i class="bi bi-file-earmark-arrow-down me-1"></i> Download PDF
+    </a>
 
-        <footer>
-            <h3>Likes: {{ snippet.get_likes }}</h3>
-            <h3>Dislikes: {{ snippet.get_dislikes }}</h3>
-        </footer>
-
+    <h5 class="fw-semibold mb-3">Comments</h5>
+    <div class="card p-4 shadow-sm mb-4">
         {% if snippet.comments.all %}
-            <h3>Comments</h3>
-            <ul>
+            <ul class="list-group list-group-flush mb-0">
                 {% for comment in snippet.comments.all %}
-                    <li>
-                        {{ comment.pub_date }} - <strong>{{ comment.author.username }}</strong>
-                        said: {{ comment.content }}
-                        {% if user == comment.author %}
-                            <form action="{% url 'delete_comment' comment.pk %}" method="post" class="d-inline">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="d-flex flex-column me-2">
+                            <div class="fw-semibold">{{ comment.author.username }}</div>
+                            <div class="small text-muted mb-2">{{ comment.pub_date|date:"M d, Y, P" }}</div>
+                            <div>{{ comment.content }}</div>
+                        </div>
+                        {% if user == comment.author or user.groups.exists or user == comment.snippet.author %}
+                            <form method="post" action="{% url 'delete_comment' comment.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn delete-btn">Delete</button>
-                            </form>
-                        {% elif user.groups.exists %}
-                            <form action="{% url 'delete_comment' comment.pk %}" method="post" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn delete-btn">Delete</button>
-                            </form>
-                        {% elif user == comment.snippet.author %}
-                            <form action="{% url 'delete_comment' comment.pk %}" method="post" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn delete-btn">Delete</button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </form>
                         {% endif %}
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>No comments yet.</p>
+            <p class="text-muted mb-0">No comments yet. Be the first to share your thoughts!</p>
         {% endif %}
-
-        <h3>Add a Comment</h3>
-        <form method="post" action="{% url 'add_comment' snippet.pk %}">
-            {% csrf_token %}
-            <textarea name="content" rows="4" cols="50"></textarea><br>
-            <input type="submit" value="Submit">
-        </form>
     </div>
+
+    <h5 class="fw-semibold mb-3">Add a Comment</h5>
+    <form method="post" action="{% url 'add_comment' snippet.pk %}" class="card p-4 shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            <textarea name="content" id="commentContent" rows="4" class="form-control"
+                      placeholder="Share your thoughts..." required></textarea>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-chat-dots me-1"></i> Submit
+            </button>
+        </div>
+    </form>
 
     <script>
         function copyToClipboard() {
-            var copyText = document.querySelector('.snippet-code .highlight');
-
-
-            var textToCopy = copyText.innerText;
-
-            navigator.clipboard.writeText(textToCopy).then(function () {
-                alert('Copied to clipboard \n');
-            })
+            const codeBlock = document.querySelector('.snippet-code pre');
+            const text = codeBlock?.innerText;
+            if (text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const toastElement = document.getElementById('copyToast');
+                    const toast = new bootstrap.Toast(toastElement);
+                    toast.show();
+                }).catch(err => {
+                    console.error('Failed to copy code: ', err);
+                });
+            }
         }
 
-        document.getElementById('download-pdf-btn').addEventListener('click', function() {
-                alert('Your PDF will be downloaded shortly.');
-            });
+        document.getElementById('download-pdf-btn')?.addEventListener('click', function () {
+            const toastElement = document.getElementById('pdfToast');
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        });
     </script>
 {% endblock %}
-

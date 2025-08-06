@@ -4,8 +4,13 @@ from snippets.views.comments import add_comment_view, delete_comment_view
 from snippets.views.download_pdf import download_pdf_view
 from snippets.views.languages import LanguageListView, LanguageDetailView
 from snippets.views.popular import TopAuthorsView, TopLanguagesView
-from snippets.views.snippets import SnippetListView, SnippetDetailView, AddSnippetView, SnippetRemoveView, \
-    edit_snippet_view
+from snippets.views.snippets import (
+    SnippetListView,
+    SnippetDetailView,
+    AddSnippetView,
+    snippet_remove_view,
+    edit_snippet_view,
+)
 
 urlpatterns = [
     path('', SnippetListView.as_view(), name='snippet_list'),
@@ -15,8 +20,8 @@ urlpatterns = [
 
 urlpatterns += [
     path('<int:pk>/', SnippetDetailView.as_view(), name='snippet_detail'),
-    path('add_snippet/', AddSnippetView, name='add_snippet'),
-    path('<int:pk>/remove/', SnippetRemoveView, name='snippet_remove'),
+    path('add_snippet/', AddSnippetView.as_view(), name='add_snippet'),
+    path('<int:pk>/remove/', snippet_remove_view, name='snippet_remove'),
     path('<int:pk>/edit/', edit_snippet_view, name='edit_snippet'),
 
     path('top-authors/', TopAuthorsView.as_view(), name='tatum24_top_authors'),

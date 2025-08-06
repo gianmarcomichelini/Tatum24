@@ -1,123 +1,42 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Bookmarks</title>
-    <link rel="stylesheet" href="{% static 'css/snippet_detail.css' %}">
-    <style>
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
+{% extends "base.html" %}
+{% block title %}Your Bookmarks{% endblock %}
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+{% block content %}
+<div class="container-lg py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h1 class="h3 fw-semibold text-primary">Your Bookmarks</h1>
+        <div class="mt-2 mt-md-0 d-flex gap-2">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-house-door"></i> Home
+            </a>
+        </div>
+    </div>
 
-        header h1 {
-            font-size: 2.5em;
-            margin: 0;
-            color: #007BFF;
-        }
-
-        .meta {
-            font-style: italic;
-            color: #666;
-        }
-
-        main {
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        .bookmark-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .bookmark-item {
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
-        }
-
-        .bookmark-title {
-            font-size: 1.2em;
-            margin-bottom: 5px;
-        }
-
-        .remove-button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .remove-button:hover {
-            background-color: #d32f2f;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <header>
-        <h1>Your Bookmarks</h1>
-    </header>
-
-    <main>
-        {% if bookmarks %}
-            <ul class="bookmark-list">
-                {% for bookmark in bookmarks %}
-                    <li class="bookmark-item">
-                        <h2 class="bookmark-title">
-                            <a href="{% url 'snippet_detail' bookmark.snippet.pk %}">{{ bookmark.snippet.title }}</a>
-                        </h2>
-                        <form action="{% url 'delete_bookmark' snippet_id=bookmark.snippet.pk %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn remove-button">Remove Bookmark</button>
-                        </form>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>You haven't bookmarked any snippets yet.</p>
-        {% endif %}
-    </main>
-
-    <footer>
-        <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
-    </footer>
+    {% if bookmarks %}
+        <ul class="list-unstyled">
+            {% for bookmark in bookmarks %}
+                <li class="bg-white rounded shadow-sm p-4 mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'snippet_detail' bookmark.snippet.pk %}"
+                           class="fw-semibold text-decoration-none text-dark">
+                            {{ bookmark.snippet.title }}
+                        </a>
+                        <small class="d-block text-muted">
+                            Created by {{ bookmark.snippet.author.username }} |
+                            {{ bookmark.snippet.language.name }}
+                        </small>
+                    </div>
+                    <form action="{% url 'delete_bookmark' snippet_id=bookmark.snippet.pk %}" method="post" class="mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="p-3 text-center text-muted bg-white rounded shadow-sm">
+            <i class="bi bi-info-circle me-1"></i> You haven't bookmarked any snippets yet.
+        </div>
+    {% endif %}
 </div>
-</body>
-</html>
+{% endblock %}

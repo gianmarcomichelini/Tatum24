@@ -12,7 +12,7 @@ from ratings.models import Rating
 
 class Language(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)  # Readable string
+    slug = models.SlugField(unique=True)
     language_code = models.CharField(max_length=50)
 
     class Meta:
@@ -41,13 +41,13 @@ class Snippet(models.Model):
     tags = models.CharField(max_length=255, default='')
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ['-update_date', '-pub_date']
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.pk:
             self.pub_date = timezone.now()
         self.update_date = timezone.now()
         self.description_html = markdown(self.description)
@@ -86,4 +86,4 @@ class Comment(models.Model):
         return f'Comment by {self.author.username} on {self.snippet.title}'
 
     def get_absolute_url(self):
-        return reverse('snippet_detail', kwargs={'pk': self.pk})
+        return self.snippet.get_absolute_url()

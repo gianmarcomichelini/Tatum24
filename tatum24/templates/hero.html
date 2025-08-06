@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Tatum24 – Your Coding Playground
+{% endblock %}
+
+{% block content %}
+    <div class="row align-items-center justify-content-center g-5 py-5">
+        <div class="col-lg-7">
+            <h1 class="display-4 fw-bold text-dark mb-3">
+                Welcome to your coding playground
+            </h1>
+            <p class="lead text-muted mb-4">
+                Discover, share, and organize your code snippets with ease. Tatum24 helps you stay inspired and
+                productive.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{% url 'snippet_list' %}" class="btn btn-primary btn-lg px-4 me-md-2">
+                    Explore Snippets
+                </a>
+                {% if not request.user.is_authenticated %}
+                    <a href="{% url 'signup' %}" class="btn btn-outline-secondary btn-lg px-4">
+                        Join Now
+                    </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="text-center">
+        {% if request.user.is_authenticated %}
+            <div class="alert alert-light mb-4">
+                Welcome back, <strong>{{ request.user.get_username }}</strong>! Ready to code?
+            </div>
+        {% endif %}
+
+        <h2 class="mb-4">Why Tatum24?</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="bi bi-share-fill text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h3 class="h5 fw-bold">Share Your Code</h3>
+                    <p class="text-muted text-center">
+                        Upload and share useful code snippets with the community in seconds.
+                    </p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="bi bi-search text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h3 class="h5 fw-bold">Discover Snippets</h3>
+                    <p class="text-muted text-center">
+                        Browse curated snippets by language, topic, or popularity.
+                    </p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="bi bi-bookmark-fill text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h3 class="h5 fw-bold">Bookmark Favorites</h3>
+                    <p class="text-muted text-center">
+                        Keep track of helpful code by bookmarking them to your personal profile.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

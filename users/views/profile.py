@@ -9,29 +9,52 @@ from users.models import Profile
 
 @login_required
 def profile_view(request):
+    """
+    Renders the user's profile page.
+    Moderators see all snippets, normal users see only their own.
+    """
     user = request.user
+
+    # Determine the template and snippets based on user group
     if user.groups.filter(name='Moderator').exists():
-        snippets = Snippet.objects.all().order_by('author__username')
-        return render(request, 'users/templates/profile/moderator_profile.html', {'user': user, 'snippets': snippets})
+        template_name = 'users/templates/profile/moderator_profile.html'
+        # Optimize query for moderators
+        snippets = Snippet.objects.select_related('author').order_by('author__username')
     else:
+        template_name = 'users/templates/profile/normal_profile.html'
         snippets = Snippet.objects.filter(author=user)
-        return render(request, 'users/templates/profile/normal_profile.html', {'user': user, 'snippets': snippets})
+
+    context = {
+        'user': user,
+        'snippets': snippets,
+    }
+    return render(request, template_name, context)
 
 
 @login_required
 def profile_update_view(request):
-    user_profile, created = Profile.objects.get_or_create(user=request.user)
+    """
+    Handles the profile update form for a user.
+    """
+    # Use request.user.profile to get the profile. Django's OneToOneField
+    # will create it on first access if it doesn't exist, preventing a
+    # DoesNotExist error. If you're not using OneToOne, your get_or_create is fine.
+    user_profile = request.user.profile
 
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Profile updated successfully')
+            messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
         else:
-            messages.error(request, 'Error while updating profile')
-
+            # The form is invalid, so let the template render the specific errors.
+            # No need for a generic error message here.
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = UserProfileForm(instance=user_profile)
 
-    return render(request, 'profile/profile_update.html', {'form': form})
+    context = {
+        'form': form,
+    }
+    return render(request, 'users/templates/profile/profile_update.html', context)

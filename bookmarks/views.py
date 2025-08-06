@@ -1,21 +1,22 @@
 from django.db.models import Count
-from snippets.models import Snippet
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
 from django.contrib import messages
+
+from snippets.models import Snippet
 from bookmarks.models import Bookmark
 
 
 @login_required
 def AddBookmarkView(request, snippet_id):
     snippet = get_object_or_404(Snippet, pk=snippet_id)
-    try:
-        Bookmark.objects.get(user=request.user, snippet=snippet)
-    except Bookmark.DoesNotExist:
-        Bookmark.objects.create(user=request.user, snippet=snippet)
-    messages.success(request, 'Snippet bookmarked successfully')
+    bookmark, created = Bookmark.objects.get_or_create(user=request.user, snippet=snippet)
+    if created:
+        messages.success(request, 'Snippet bookmarked successfully.')
+    else:
+        messages.info(request, 'Snippet was already bookmarked.')
     return HttpResponseRedirect(snippet.get_absolute_url())
 
 
@@ -25,13 +26,10 @@ def DeleteBookmarkView(request, snippet_id):
     if request.method == "POST":
         if snippet.bookmarks.filter(user=request.user).exists():
             Bookmark.objects.filter(user=request.user, snippet=snippet).delete()
-            messages.success(request, 'Snippet not bookmarked successfully.')
+            messages.success(request, 'Snippet removed from bookmarks successfully.')
         else:
             messages.info(request, 'Snippet was not bookmarked.')
-        return redirect(snippet.get_absolute_url())
-    else:
-        return render(request, 'bookmarks/templates/bookmark/confirm_bookmark_delete.html', {'snippet': snippet})
-
+    return redirect('/bookmarks/user-bookmarks/')
 
 class UserBookmarksListView(ListView):
     model = Bookmark
@@ -55,9 +53,6 @@ class MostBookmarkedView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = Snippet.objects.annotate(bookmark_count=Count('bookmarks')).order_by('-bookmark_count')
-        return queryset[:3]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+        return Snippet.objects.annotate(
+            bookmark_count=Count('bookmarks')
+        ).order_by('-bookmark_count')[:3]

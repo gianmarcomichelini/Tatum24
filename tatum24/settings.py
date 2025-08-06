@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     "snippets",
     "ratings",
     "bookmarks",
-    "users"
+    "users",
+'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -105,13 +106,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'it'
 
-TIME_ZONE = 'Europe/Rome'
+TIME_ZONE = 'UTC'
+USE_TZ = True
+LANGUAGE_CODE = 'en-us'
 
 USE_I18N = True
 
-USE_TZ = True
 
 MEDIA_URL = '/media/'  # URL prefix for media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

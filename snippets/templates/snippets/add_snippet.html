@@ -1,98 +1,89 @@
 {% extends 'tatum24/templates/base.html' %}
+{% load widget_tweaks %}
 {% load static %}
-<title>Add a Snippet</title>
-{% block title %}
-    Edit Snippet
-{% endblock %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'css/snippets_basic.css' %}">
+{% block title %}
+    Add a Snippet
 {% endblock %}
 
 {% block content %}
+<div class="container-lg py-4">
+  <header class="mb-4">
+    <h1 class="h3 text-primary fw-semibold mb-1">Add a Snippet</h1>
+    <p class="text-muted">Use the form below to submit your snippet - all fields are required.</p>
+  </header>
 
+  <main>
+    <form method="post" action="{% url 'add_snippet' %}?next={% url 'add_snippet' %}" class="bg-white p-4 rounded shadow-sm">
+      {% csrf_token %}
 
-    <body>
-    <div class="container">
-        <header>
-            <h1>Add a Snippet</h1>
-            <p>Use the form below to submit your snippet - all fields are required.</p>
-        </header>
+      <div class="mb-3">
+        <label for="id_title" class="form-label">Title</label>
+        {{ form.title|add_class:"form-control" }}
+        {% if form.title.errors %}
+          <div class="text-danger small">{{ form.title.errors|join:", " }}</div>
+        {% endif %}
+      </div>
 
-        <main>
-            <form method="post" action="{% url 'add_snippet' %}?next={% url 'add_snippet' %}">
-                {% csrf_token %}
+      <div class="mb-3">
+        <label for="id_language" class="form-label">Language</label>
+        {{ form.language|add_class:"form-select" }}
+        {% if form.language.errors %}
+          <div class="text-danger small">{{ form.language.errors|join:", " }}</div>
+        {% endif %}
+      </div>
 
-                <div class="form-group">
-                    <label for="id_title">Title:</label><br>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                        <p class="error">{{ form.title.errors|join:" " }}</p>
-                    {% endif %}
-                </div>
+      <div class="mb-3">
+        <label for="id_description" class="form-label">Description</label>
+        {{ form.description|add_class:"form-control" }}
+        {% if form.description.errors %}
+          <div class="text-danger small">{{ form.description.errors|join:", " }}</div>
+        {% endif %}
+      </div>
 
-                <div class="form-group">
-                    <label for="id_language">Language:</label><br>
-                    {{ form.language }}
-                    {% if form.language.errors %}
-                        <p class="error">{{ form.language.errors|join:" " }}</p>
-                    {% endif %}
-                </div>
+      <div class="mb-3">
+        <label for="id_code" class="form-label">Code</label>
+        {{ form.code|add_class:"form-control font-monospace" }}
+        {% if form.code.errors %}
+          <div class="text-danger small">{{ form.code.errors|join:", " }}</div>
+        {% endif %}
+      </div>
 
-                <div class="form-group">
-                    <label for="id_description">Description:</label><br>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                        <p class="error">{{ form.description.errors|join:" " }}</p>
-                    {% endif %}
-                </div>
+      <div class="mb-3">
+        <label for="id_tags" class="form-label">Tags</label>
+        {{ form.tags|add_class:"form-control" }}
+        {% if form.tags.errors %}
+          <div class="text-danger small">{{ form.tags.errors|join:", " }}</div>
+        {% endif %}
+      </div>
 
-                <div class="form-group">
-                    <label for="id_code">Code:</label><br>
-                    {{ form.code }}
-                    {% if form.code.errors %}
-                        <p class="error">{{ form.code.errors|join:" " }}</p>
-                    {% endif %}
-                </div>
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </main>
 
-                <div class="form-group">
-                    <label for="id_tags">Tags:</label><br>
-                    {{ form.tags }}
-                    {% if form.tags.errors %}
-                        <p class="error">{{ form.tags.errors|join:" " }}</p>
-                    {% endif %}
-                </div>
+  <footer class="mt-4 text-center">
+    <a href="{% url 'home' %}" class="text-decoration-none text-secondary">
+      &larr; Back to Home
+    </a>
+  </footer>
+</div>
 
-                <div class="form-group">
-                    <input type="submit" value="Submit" class="btn btn-primary">
-                </div>
-            </form>
-        </main>
-
-        <footer>
-            <h1>
-                <p>Back to <a href="{% url 'home' %}">Home</a></p>
-            </h1>
-        </footer>
-    </div>
-    </body>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var codeField = document.getElementById('id_code');
-            codeField.addEventListener('keydown', function (e) {
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    var start = this.selectionStart;
-                    var end = this.selectionEnd;
-
-                    // set textarea value to: text before caret + tab + text after caret
-                    this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-
-                    // put caret at right position again
-                    this.selectionStart = this.selectionEnd = start + 1;
-                }
-            });
-        });
-    </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var codeField = document.getElementById('id_code');
+    if (codeField) {
+      codeField.addEventListener('keydown', function (e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          var start = this.selectionStart;
+          var end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 1;
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

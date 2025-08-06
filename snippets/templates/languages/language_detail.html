@@ -1,41 +1,38 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ language.name }} - Code Snippets</title>
-    <link rel="stylesheet" href="{% static 'css/snippet_detail.css' %}">
-    <link rel="stylesheet" href="{% static 'css/pygments.css' %}">
-</head>
-<body>
-<div class="container">
-    <header>
-        <h1>{{ language.name }} Code Snippets</h1>
-    </header>
-    <footer>
-        <a href="{% url 'home' %}" class="btn">Back to Home</a>
-        <a href="{% url 'language_list' %}" class="btn">Back to Languages</a>
-    </footer>
+{% extends 'base.html' %}
 
-    <main>
-        {% for snippet in snippets %}
-            <div class="snippet">
-                <div class="snippet-title">
-                    <h2><a href="{% url 'snippet_detail' snippet.pk %}">{{ snippet.title }}</a></h2>
-                </div>
-                <div class="snippet-meta">
-                    <p>Author: {{ snippet.author }}</p>
-                </div>
-                <hr>
-            </div>
-        {% endfor %}
-    </main>
+{% block title %}{{ language.name }} - Code Snippets{% endblock %}
 
-    <footer>
-        <a href="{% url 'home' %}" class="btn">Back to Home</a>
-        <a href="{% url 'language_list' %}" class="btn">Back to Languages</a>
-    </footer>
+{% block content %}
+<div class="container-lg py-4">
+  <header class="mb-4 text-center">
+    <h1 class="fw-semibold text-primary">{{ language.name }} Code Snippets</h1>
+  </header>
+
+  {% if snippets %}
+    <ul class="list-unstyled">
+      {% for snippet in snippets %}
+        <li class="bg-white rounded shadow-sm p-4 mb-3 d-flex justify-content-between align-items-center">
+          <div>
+            <a href="{% url 'snippet_detail' snippet.pk %}" class="fw-semibold text-decoration-none text-dark">
+              {{ snippet.title }}
+            </a>
+            <small class="d-block text-muted">Author: {{ snippet.author }}</small>
+          </div>
+          <i class="bi bi-chevron-right text-muted fs-5"></i>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="text-center text-muted py-4 card-style">
+      <i class="bi bi-info-circle me-1"></i> No snippets available for this language.
+    </div>
+  {% endif %}
+
+  <footer class="mt-4 d-flex justify-content-center gap-3">
+      <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-house-door"></i> Back to Home
+      </a>
+    <a href="{% url 'language_list' %}" class="btn btn-outline-primary btn-sm">Back to Languages</a>
+  </footer>
 </div>
-</body>
-</html>
+{% endblock %}

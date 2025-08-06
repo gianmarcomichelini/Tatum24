@@ -1,130 +1,32 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Language List</title>
-    <link rel="stylesheet" href="{% static 'css/listed.css' %}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
+{% extends 'base.html' %}
+{% block title %}Language List{% endblock %}
 
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
+{% block content %}
+<div class="container-lg py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <h1 class="h3 fw-semibold text-primary">All Languages</h1>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+      <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-house-door"></i> Home
+      </a>
+    </div>
+  </div>
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin: 0;
-            color: #007BFF;
-        }
-
-        main ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        main ul li {
-            margin: 10px 0;
-            font-size: 1.2em;
-        }
-
-        main ul li a {
-            text-decoration: none;
-            color: #007BFF;
-            transition: color 0.3s;
-        }
-
-        main ul li a:hover {
-            color: #0056b3;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .pagination .step-links {
-            display: flex;
-            gap: 10px;
-        }
-
-        .pagination .step-links a,
-        .pagination .step-links .current {
-            padding: 8px 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            color: #007BFF;
-            text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .pagination .step-links a:hover {
-            background-color: #e9ecef;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <header>
-        <h1>Languages</h1>
-    </header>
-    <header>
-        <nav>
-            <a href="{% url 'home' %}">Home</a>
-        </nav>
-    </header>
-
-    <main>
-        <ul>
-            {% for language in languages %}
-                <li><a href="{% url 'language_detail' language.slug %}">{{ language.name }}</a></li>
-            {% endfor %}
-        </ul>
-
-    </main>
-
+  {% if languages %}
+    <ul class="list-unstyled">
+      {% for language in languages %}
+        <li class="bg-white rounded shadow-sm p-4 mb-3 d-flex justify-content-between align-items-center">
+          <a href="{% url 'language_detail' language.slug %}" class="fw-semibold text-decoration-none text-dark">
+            {{ language.name }}
+          </a>
+          <i class="bi bi-chevron-right text-muted"></i>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="p-3 text-center text-muted bg-white rounded shadow-sm">
+      <i class="bi bi-info-circle me-1"></i> No languages found.
+    </div>
+  {% endif %}
 </div>
-</body>
-</html>
+{% endblock %}

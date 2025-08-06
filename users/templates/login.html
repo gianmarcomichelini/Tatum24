@@ -1,116 +1,72 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/snippets_basic.css' %}">
-    <title>Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f0f0f0;
-            padding: 20px;
-        }
+{% load widget_tweaks %}
 
-        .form-container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
 
-        .form-container h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+{% block title %}Login{% endblock %}
 
-        .form-container p {
-            margin-bottom: 10px;
-        }
+{% block css %}
+<style>
+    .form-container {
+        max-width: 400px;
+        margin: 3rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .error {
+        color: #dc3545; /* bootstrap danger */
+        font-size: 0.875rem;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+</style>
+{% endblock %}
 
-        .form-container label {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .form-container input[type="text"],
-        .form-container input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-
-        .form-container input[type="submit"] {
-            background-color: #4CAF50;
-            transform: translate(-50%, -50%);
-            left: 50%;
-            top: 20px;
-            position: relative;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .form-container input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .error {
-            color: #f44336;
-            font-size: 14px;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
+{% block content %}
 <div class="form-container">
-    <h2>Login</h2>
+    <h2 class="text-center mb-4">Login</h2>
 
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-            <p class="error">{{ form.non_field_errors|join:" " }}</p>
+            <div class="alert alert-danger" role="alert">
+                {{ form.non_field_errors|join:" " }}
+            </div>
         {% endif %}
 
-        <p>
-            <label for="id_username">Username:</label>
+        <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+            {{ form.username|add_class:"form-control" }}
             {% if form.username.errors %}
-                <span class="error">{{ form.username.errors|join:" " }}</span>
+                {% for error in form.username.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
             {% endif %}
-            {{ form.username }}
-        </p>
+        </div>
 
-        <p>
-            <label for="id_password">Password:</label>
+        <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+            {{ form.password|add_class:"form-control" }}
             {% if form.password.errors %}
-                <span class="error">{{ form.password.errors|join:" " }}</span>
+                {% for error in form.password.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
             {% endif %}
-            {{ form.password }}
-        </p>
+        </div>
 
         <input type="hidden" name="next" value="{{ next }}">
 
-        <p>
-            <input type="submit" value="Login">
-        </p>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
 </div>
-<footer>
-    <h1>
-        <p>Back to <a href="{% url 'home' %}">Home</a></p>
-    </h1>
-</footer>
-</body>
-</html>
+
+<div class="text-center mt-4">
+    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+        Back to Home
+    </a>
+</div>
+{% endblock %}

@@ -6,6 +6,7 @@ from django.http import HttpResponseBadRequest
 from ratings.models import Rating
 from snippets.models import Snippet
 
+from django.contrib import messages
 
 @login_required
 def RateSnippetView(request, pk):
@@ -22,13 +23,14 @@ def RateSnippetView(request, pk):
             rating = snippet.ratings.get(user=user)
             rating.rating = rating_value
             rating.save()
+            messages.success(request, 'Rating updated successfully.')
         else:
             Rating.objects.create(snippet=snippet, user=user, rating=rating_value)
+            messages.success(request, 'Rating added successfully.')
 
         return redirect('snippet_detail', pk=pk)
     else:
         return HttpResponseBadRequest("Only POST method is allowed for rating snippets")
-
 
 def TopRatedSnippetsView(request):
     # Annotate each Snippet with counts of likes and dislikes

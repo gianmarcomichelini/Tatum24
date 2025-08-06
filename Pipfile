@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 channels = "*"
 markdown = "*"
+pygments = "*"
+xhtml2pdf = "*"
+django-widget-tweaks = "*"
 
 [dev-packages]
 

@@ -1,141 +1,43 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Authors</title>
-    <link rel="stylesheet" href="{% static 'css/popular.css' %}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        header h1 {
-            font-size: 2.5em;
-            margin: 0;
-            color: #007BFF;
-        }
-        nav {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        nav a {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 20px;
-            text-decoration: none;
-            color: #fff;
-            background-color: #007BFF;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        nav a:hover {
-            background-color: #0056b3;
-        }
-        main table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        main th, main td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        main th {
-            background-color: #f2f2f2;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .pagination .step-links {
-            display: flex;
-            gap: 10px;
-        }
-        footer {
-            margin-top: 20px;
-            text-align: center;
-        }
-        footer .btn {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 20px;
-            text-decoration: none;
-            color: #fff;
-            background-color: #007BFF;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        footer .btn:hover {
-            background-color: #0056b3;
-        }
-        .pagination .step-links a,
-        .pagination .step-links .current {
-            padding: 8px 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            color: #007BFF;
-            text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .pagination .step-links a:hover {
-            background-color: #e9ecef;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <header>
-        <h1>Top Authors by Number of Snippets</h1>
-        <footer>
-            <a href="{% url 'home' %}" class="btn">Back to Home</a>
-            <a href="{% url 'snippet_list' %}" class="btn">Back to Snippets</a>
-        </footer>
-    </header>
+{% extends 'base.html' %}
+{% block title %}Top Authors{% endblock %}
 
-    <main>
-        <table>
-            <thead>
-                <tr>
-                    <th>Author</th>
-                    <th>Number of Snippets</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for author in popular_top_authors_list %}
-                    <tr>
-                        <td>{{ author.username }}</td>
-                        <td>{{ author.snippet_count }}</td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="2">No authors found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
+{% block content %}
+<div class="container-lg py-4">
+  <header class="mb-4 text-center">
+    <h1 class="h3 fw-semibold text-primary">Best Authors</h1>
+      <h2 class="h6 fw-normal text-secondary"> By number of snippets</h2>
+  </header>
 
+  {% if popular_top_authors_list %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle mb-4">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Author</th>
+            <th scope="col">Number of Snippets</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for author in popular_top_authors_list %}
+            <tr>
+              <td>{{ author.username }}</td>
+              <td>{{ author.snippet_count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center text-muted py-4">
+      <i class="bi bi-info-circle me-1"></i> No authors found.
+    </div>
+  {% endif %}
+
+  <footer class="mt-4 d-flex justify-content-center gap-3">
+      <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-house-door"></i> Back to Home
+      </a>
+    <a href="{% url 'snippet_list' %}" class="btn btn-outline-primary btn-sm">Back to Snippets</a>
+  </footer>
 </div>
-</body>
-</html>
+{% endblock %}

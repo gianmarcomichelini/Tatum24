@@ -1,159 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign up for an account</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f0f0f0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load static %}
 
-        .form-container {
-            max-width: 400px;
-            margin: 20px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+{% block title %}Sign up for an account{% endblock %}
 
-        .form-container h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
 
-        .form-container p {
-            margin-bottom: 10px;
-        }
-
-        .form-container label {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .form-container input[type="text"],
-        .form-container input[type="email"],
-        .form-container input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-
-        .form-container input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .form-container input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .error {
-            color: #f44336;
-            font-size: 14px;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-
-        .password-requirements {
-            background-color: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        header {
-            width: 100%;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #007BFF;
-            font-size: 1.2em;
-        }
-
-        nav a:hover {
-            color: #0056b3;
-        }
-    </style>
-</head>
-<body>
+{% block content %}
 <div class="form-container">
-    <h2>Sign up for an account</h2>
-    <p>Use the form below to register for your new account — all fields are required.</p>
+    <div class="p-4 p-md-5 card-style">
+        <h2 class="text-center mb-4">Sign up for an account</h2>
+        <p class="mb-4 text-muted text-center">
+            Use the form below to register for your new account.
+        </p>
 
-    <form method="post" action="{% url 'signup' %}">
-        {% csrf_token %}
+        <form method="post" action="{% url 'signup' %}">
+            {% csrf_token %}
 
-        {% if form.non_field_errors %}
-            <p class="error">{{ form.non_field_errors|join:" " }}</p>
-        {% endif %}
-
-        <p>
-            <label for="id_username">Username:</label>
-            {% if form.username.errors %}
-                <span class="error">{{ form.username.errors|join:" " }}</span>
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ form.non_field_errors|join:" " }}
+                </div>
             {% endif %}
-            {{ form.username }}
-        </p>
 
-        <p>
-            <label for="id_email">Your e-mail address:</label>
-            {% if form.email.errors %}
-                <span class="error">{{ form.email.errors|join:" " }}</span>
-            {% endif %}
-            {{ form.email }}
-        </p>
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field|add_class:"form-control" }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
 
-        <p>
-            <label for="id_password1">Password:</label>
-            {% if form.password1.errors %}
-                <span class="error">{{ form.password1.errors|join:" " }}</span>
-            {% endif %}
-            {{ form.password1 }}
-        </p>
+            {% endfor %}
 
-        <p class="password-requirements">
-            Password must be at least 8 characters long, contain at least one digit, one uppercase letter, one lowercase
-            letter, and one special character.
-        </p>
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
+    </div>
 
-        <p>
-            <label for="id_password2">Password (again to catch typos):</label>
-            {% if form.password2.errors %}
-                <span class="error">{{ form.password2.errors|join:" " }}</span>
-            {% endif %}
-            {{ form.password2 }}
-        </p>
-
-        <p>
-            <input type="submit" value="Submit">
-        </p>
-    </form>
+    <div class="text-center mt-4">
+        <span class="text-muted small">Already have an account? <a href="{% url 'login' %}">Log in here</a></span>
+    </div>
 </div>
-<header>
-    <nav>
-        <a href="{% url 'home' %}">Home</a>
-    </nav>
-</header>
-</body>
-</html>
+{% endblock %}
