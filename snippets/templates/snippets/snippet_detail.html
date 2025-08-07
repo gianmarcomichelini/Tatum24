@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'templates/base.html' %}
 {% load static %}
 
 {% block title %}{{ snippet.title }}{% endblock %}
@@ -19,65 +19,93 @@
             gap: 1rem;
         }
 
-        /* Light Theme for Code Block */
+        .code-block-container {
+            position: relative;
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+
         .code-block-container .snippet-code pre {
             margin: 0;
             padding: 1rem;
-            background-color: #f9f9f9 !important; /* A soft, light gray background */
-            border: 1px solid #e0e0e0; /* A subtle border */
+            background-color: #f9f9f9 !important;
+            border: 1px solid #e0e0e0;
             border-top: none;
             color: #333;
             font-family: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
             font-size: 0.875rem;
             line-height: 1.5;
             white-space: pre-wrap;
-            word-break: break-all;
+            word-break: break-word;
         }
 
-        /* Adjustments for the card header */
         .card-header-code {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #e9ecef; /* Lighter background for the header */
+            background-color: #e9ecef;
             border-bottom: 1px solid #e0e0e0;
             font-weight: 600;
             padding: 0.75rem 1.25rem;
-            border-top-left-radius: 0.5rem;
-            border-top-right-radius: 0.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        .btn-rating {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 50px;
+            border: 1px solid #ced4da;
+            background-color: #f8f9fa;
+            color: #495057;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .btn-rating:hover:not(:disabled) {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .btn-rating:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-rating.active-like {
+            background-color: #28a745;
+            color: #fff;
+            border-color: #28a745;
+        }
+
+        .btn-rating.active-dislike {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .btn-rating.active-like .bi,
+        .btn-rating.active-dislike .bi {
+            color: #fff;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="toast-container">
-        <div id="copyToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Code copied to clipboard!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-
-        <div id="pdfToast" class="toast align-items-center text-bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Your PDF will be downloaded shortly.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
-
     <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
         <div>
             <h1 class="h2 fw-bold mb-1">{{ snippet.title }}</h1>
             <p class="text-muted mb-0">By {{ snippet.author }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
-            {% if snippet.author %}
+            {% if user == snippet.author %}
                 <a href="{% url 'edit_snippet' snippet.pk %}" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-pencil-square me-1"></i> Edit
                 </a>
@@ -119,51 +147,14 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4">
-            <div class="card p-4 h-100 shadow-sm d-flex flex-column justify-content-between">
-                <h5 class="fw-semibold mb-3">Ratings</h5>
-                <div class="d-flex gap-2 align-items-center mb-3">
-                    <form method="post" action="{% url 'rate_snippet' snippet.pk %}" class="d-flex gap-2">
-                        {% csrf_token %}
-                        {% if snippet.user_rating == 'like' %}
-                            <button type="button" class="btn btn-success btn-sm" disabled>
-                                <i class="bi bi-hand-thumbs-up-fill me-1"></i> Liked
-                            </button>
-                            <button type="submit" name="rating" value="dislike" class="btn btn-outline-danger btn-sm">
-                                <i class="bi bi-hand-thumbs-down me-1"></i> Dislike
-                            </button>
-                        {% elif snippet.user_rating == 'dislike' %}
-                            <button type="submit" name="rating" value="like" class="btn btn-outline-success btn-sm">
-                                <i class="bi bi-hand-thumbs-up me-1"></i> Like
-                            </button>
-                            <button type="button" class="btn btn-danger btn-sm" disabled>
-                                <i class="bi bi-hand-thumbs-down-fill me-1"></i> Disliked
-                            </button>
-                        {% else %}
-                            <button type="submit" name="rating" value="like" class="btn btn-outline-success btn-sm">
-                                <i class="bi bi-hand-thumbs-up me-1"></i> Like
-                            </button>
-                            <button type="submit" name="rating" value="dislike" class="btn btn-outline-danger btn-sm">
-                                <i class="bi bi-hand-thumbs-down me-1"></i> Dislike
-                            </button>
-                        {% endif %}
-                    </form>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted small">Likes: {{ snippet.get_likes }}</span>
-                    <span class="text-muted small">Dislikes: {{ snippet.get_dislikes }}</span>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <div class="card p-4 shadow-sm mb-4">
-        <h5 class="fw-semibold mb-3">Description</h5>
-        <div class="code-highlight">
-            {{ snippet.description_html|safe }}
+    {% if snippet.description_html %}
+        <div class="card p-4 shadow-sm mb-4">
+            <h5 class="fw-semibold mb-3">Description</h5>
+            <div class="code-highlight">{{ snippet.description_html|safe }}</div>
         </div>
-    </div>
+    {% endif %}
 
     <div class="card shadow-sm mb-4">
         <div class="card-header-code">
@@ -173,28 +164,67 @@
             </button>
         </div>
         <div class="code-block-container">
-            <div class="snippet-code">
-                {{ snippet.highlighted_code|safe }}
-            </div>
+            <div class="snippet-code">{{ snippet.highlighted_code|safe }}</div>
         </div>
     </div>
 
-    <a id="download-pdf-btn" href="{% url 'download_pdf' snippet.pk %}" class="btn btn-dark btn-sm mb-5">
-        <i class="bi bi-file-earmark-arrow-down me-1"></i> Download PDF
-    </a>
+    <div class="d-flex justify-content-between align-items-start mb-5">
+        <form method="post" action="{% url 'rate_snippet' snippet.pk %}" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" name="rating" value="like"
+                    class="btn-rating {% if snippet.user_rating == 'like' %}active-like{% endif %}"
+                    {% if snippet.user_rating == 'like' %}disabled{% endif %}>
+                <i class="bi bi-hand-thumbs-up-fill me-1"></i>
+                <span class="d-none d-md-inline">{{ snippet.get_likes }}</span>
+            </button>
+            <button type="submit" name="rating" value="dislike"
+                    class="btn-rating {% if snippet.user_rating == 'dislike' %}active-dislike{% endif %}"
+                    {% if snippet.user_rating == 'dislike' %}disabled{% endif %}>
+                <i class="bi bi-hand-thumbs-down-fill me-1"></i>
+                <span class="d-none d-md-inline">{{ snippet.get_dislikes }}</span>
+            </button>
+        </form>
+
+        <a id="download-pdf-btn" href="{% url 'download_pdf' snippet.pk %}" class="btn btn-dark btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Download PDF
+        </a>
+    </div>
+
+    {% if recommended_snippets and request.user.is_authenticated %}
+        <h5 class="fw-semibold mb-3">Recommended Snippets</h5>
+        <div class="card p-4 shadow-sm mb-4">
+            <ul class="list-group list-group-flush mb-0">
+                {% for snippet in recommended_snippets %}
+                    <li class="bg-info-subtle border border-info rounded shadow-sm p-4 mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'snippet_detail' snippet.pk %}"
+                               class="fw-semibold text-decoration-none text-dark">
+                                {{ snippet.title }}
+                            </a>
+                            <small class="d-block text-muted">Created by {{ snippet.author.username }}
+                                | {{ snippet.language.name }}</small>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
     <h5 class="fw-semibold mb-3">Comments</h5>
     <div class="card p-4 shadow-sm mb-4">
-        {% if snippet.comments.all %}
+        {% if snippet.comments.exists %}
             <ul class="list-group list-group-flush mb-0">
                 {% for comment in snippet.comments.all %}
                     <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="d-flex flex-column me-2">
-                            <div class="fw-semibold">{{ comment.author.username }}</div>
-                            <div class="small text-muted mb-2">{{ comment.pub_date|date:"M d, Y, P" }}</div>
-                            <div>{{ comment.content }}</div>
+                        <div class="d-flex align-items-start me-2">
+                            <i class="bi bi-person-circle fs-4 text-muted me-2 mt-1"></i>
+                            <div class="d-flex flex-column">
+                                <div class="fw-semibold">{{ comment.author.username }}</div>
+                                <div class="small text-muted mb-2">{{ comment.pub_date|date:"M d, Y, P" }}</div>
+                                <div>{{ comment.content }}</div>
+                            </div>
                         </div>
-                        {% if user == comment.author or user.groups.exists or user == comment.snippet.author %}
+                        {% if user == comment.author or user == snippet.author or user.is_staff %}
                             <form method="post" action="{% url 'delete_comment' comment.pk %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -214,8 +244,8 @@
     <form method="post" action="{% url 'add_comment' snippet.pk %}" class="card p-4 shadow-sm">
         {% csrf_token %}
         <div class="mb-3">
-            <textarea name="content" id="commentContent" rows="4" class="form-control"
-                      placeholder="Share your thoughts..." required></textarea>
+        <textarea name="content" id="commentContent" rows="4" class="form-control"
+                  placeholder="Share your thoughts..." required></textarea>
         </div>
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">
@@ -223,26 +253,23 @@
             </button>
         </div>
     </form>
-
+{% endblock %}
+{% block scripts %}
     <script>
         function copyToClipboard() {
-            const codeBlock = document.querySelector('.snippet-code pre');
-            const text = codeBlock?.innerText;
-            if (text) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const toastElement = document.getElementById('copyToast');
-                    const toast = new bootstrap.Toast(toastElement);
-                    toast.show();
-                }).catch(err => {
-                    console.error('Failed to copy code: ', err);
-                });
-            }
-        }
+            const codeBlock = document.querySelector('.snippet-code');
+            if (!codeBlock) return;
 
-        document.getElementById('download-pdf-btn')?.addEventListener('click', function () {
-            const toastElement = document.getElementById('pdfToast');
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-        });
+            const text = codeBlock.innerText;
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    const toastElement = document.getElementById('copyToast');
+                    if (toastElement) {
+                        const toast = new bootstrap.Toast(toastElement);
+                        toast.show();
+                    }
+                })
+                .catch(err => console.error('Copy failed:', err));
+        }
     </script>
 {% endblock %}

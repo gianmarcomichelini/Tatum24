@@ -72,6 +72,17 @@ class Snippet(models.Model):
     def get_comments(self):
         return self.comments.all()
 
+    def get_normalized_tags(self):
+        return set(tag.strip().lower() for tag in self.tags.split(',') if tag.strip())
+
+    def get_weighted_score(self):
+        likes = self.get_likes()
+        dislikes = self.get_dislikes()
+        total_ratings = likes + dislikes
+        if total_ratings == 0:
+            return 0
+        return (likes - dislikes) / total_ratings
+
 
 class Comment(models.Model):
     snippet = models.ForeignKey(Snippet, related_name='comments', on_delete=models.CASCADE)

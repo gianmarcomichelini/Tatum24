@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_root/
+local_settings.py
+.env
+
+# PostgreSQL dump files
+*.dump
+
+# VSCode settings
+.vscode/
+
+# macOS
+.DS_Store
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Pytest
+.pytest_cache/
+
+# Migrations (optional, if auto-generated and not versioned)
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Node (if you use npm for static tooling)
+node_modules/

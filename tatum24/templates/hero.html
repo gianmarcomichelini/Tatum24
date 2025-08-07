@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'templates/base.html' %}
 {% load static %}
 
 {% block title %}
@@ -6,15 +6,22 @@
 {% endblock %}
 
 {% block content %}
+    {% if request.user.is_authenticated %}
+            <div >
+                Welcome back, <strong>{{ request.user.get_username }}</strong>! Ready to code?
+            </div>
+        {% endif %}
     <div class="row align-items-center justify-content-center g-5 py-5">
         <div class="col-lg-7">
             <h1 class="display-4 fw-bold text-dark mb-3">
                 Welcome to your coding playground
             </h1>
-            <p class="lead text-muted mb-4">
-                Discover, share, and organize your code snippets with ease. Tatum24 helps you stay inspired and
-                productive.
+        <div class="lead text-muted mb-4">
+            <p >
+                Discover, share, and organize your code snippets with ease.
             </p>
+        </div>
+
             <div class="d-grid gap-2 d-md-flex justify-content-md-start">
                 <a href="{% url 'snippet_list' %}" class="btn btn-primary btn-lg px-4 me-md-2">
                     Explore Snippets
@@ -32,11 +39,7 @@
     <hr class="my-5">
 
     <div class="text-center">
-        {% if request.user.is_authenticated %}
-            <div class="alert alert-light mb-4">
-                Welcome back, <strong>{{ request.user.get_username }}</strong>! Ready to code?
-            </div>
-        {% endif %}
+
 
         <h2 class="mb-4">Why Tatum24?</h2>
         <div class="row row-cols-1 row-cols-md-3 g-4">

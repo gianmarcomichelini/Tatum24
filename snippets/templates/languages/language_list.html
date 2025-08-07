@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'templates/base.html' %}
 {% block title %}Language List{% endblock %}
 
 {% block content %}
@@ -19,7 +19,6 @@
           <a href="{% url 'language_detail' language.slug %}" class="fw-semibold text-decoration-none text-dark">
             {{ language.name }}
           </a>
-          <i class="bi bi-chevron-right text-muted"></i>
         </li>
       {% endfor %}
     </ul>

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'templates/base.html' %}
 {% block title %}Snippet List{% endblock %}
 
 {% block content %}
@@ -27,6 +27,28 @@
             </div>
         </form>
 
+        {% if recommended_snippets and request.user.is_authenticated %}
+        <div class="mb-4">
+            <h2 class="h5 fw-semibold text-muted">Suggested for You <i class="bi bi-star-fill text-warning"></i></h2>
+            <ul class="list-unstyled">
+                {% for snippet in recommended_snippets %}
+                    <li class="bg-info-subtle border border-info rounded shadow-sm p-4 mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'snippet_detail' snippet.pk %}"
+                               class="fw-semibold text-decoration-none text-dark">
+                                {{ snippet.title }}
+                            </a>
+                            <small class="d-block text-muted">Created by {{ snippet.author.username }}
+                                | {{ snippet.language.name }}</small>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <hr>
+        </div>
+        {% endif %}
+
+        <h2 class="h5 fw-semibold text-muted">All Snippets</h2>
         {% if snippets %}
             <ul class="list-unstyled">
                 {% for snippet in snippets %}

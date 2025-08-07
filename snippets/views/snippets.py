@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView
 from snippets.models import Snippet
 from snippets.forms.search_input_forms import SnippetSearchForm
+from snippets.utils.recommendations import get_user_recommendations, get_similar_snippets
 
 
 class SnippetListView(ListView):
@@ -16,16 +17,38 @@ class SnippetListView(ListView):
     context_object_name = 'snippets'
     paginate_by = 20
 
+    # Store recommended snippets in an instance variable
+    recommended_snippets = None
+
     def get_queryset(self):
         queryset = super().get_queryset()
         query = self.request.GET.get('q', '').strip()
+
+        # Get recommendations first if the user is authenticated
+        user = self.request.user
+        if user.is_authenticated:
+            # We'll call the recommendation function here
+            # and store the result for use in get_context_data
+            self.recommended_snippets = get_user_recommendations(user, top_n=5)
+            # Exclude the recommended snippets from the main queryset before pagination
+            if self.recommended_snippets:
+                recommended_ids = [s.pk for s in self.recommended_snippets]
+                queryset = queryset.exclude(pk__in=recommended_ids)
+
         if query:
             queryset = queryset.filter(title__icontains=query)
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Add the pre-fetched recommended snippets to the context
+        if self.recommended_snippets:
+            context['recommended_snippets'] = self.recommended_snippets
+
         context['search_form'] = SnippetSearchForm(self.request.GET)
+
         return context
 
 
@@ -40,13 +63,16 @@ class SnippetDetailView(DetailView):
         user = self.request.user
         context['user'] = user
         context['bookmarked'] = user.is_authenticated and user.bookmarks.filter(snippet=snippet).exists()
+
+        # Use the user-aware version of get_similar_snippets
+        context['recommended_snippets'] = get_similar_snippets(snippet, user=user)
         return context
 
 
 class AddSnippetForm(forms.ModelForm):
     class Meta:
         model = Snippet
-        fields = ['title', 'code', 'description', 'language', 'tags']  # metti solo i campi utilizzati
+        fields = ['title', 'code', 'description', 'language', 'tags']
 
 
 class AddSnippetView(LoginRequiredMixin, CreateView):
